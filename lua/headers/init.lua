@@ -28,6 +28,34 @@ local config_file_footer = [[
 M.roots = {}
 M.files = {}
 M.folders = {}
+local non_code = {
+	"sh",
+	"zsh",
+	"bash",
+	"fish",
+	"vim",
+	"markdown",
+	"txt",
+	"json",
+	"yaml",
+	"toml",
+	"ini",
+	"html",
+	"css",
+	"sql",
+	"xml",
+	"cmake",
+	"make",
+	"diff",
+	"patch",
+	"git",
+	"gitcommit",
+	"gitconfig",
+	"gitignore",
+	"gitattributes",
+}
+
+require("headers.table").set_all(non_code, true)
 
 --- Traverses folders from the shallowest to the deepest, executing the callback for each folder
 ---@param folder string
@@ -81,12 +109,13 @@ local function warn()
 	local buf = vim.api.nvim_get_current_buf()
 	local file = vim.api.nvim_buf_get_name(buf)
 	local folder = vim.fs.dirname(file)
+	local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
 
-	-- TODO(LucasTA): also ignore non-code files
 	if
 			not (vim.bo.modifiable and vim.bo.modified) or
 			file == M.config.paths_file or
-			shell_out("git check-ignore -q " .. file) ~= nil
+			shell_out("git check-ignore -q " .. file) ~= nil or
+			non_code[filetype] == true
 	then
 		return
 	end
