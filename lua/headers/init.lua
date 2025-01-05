@@ -210,6 +210,8 @@ local function warn()
 
 		vim.diagnostic.set(namespace, buf, diagnostics)
 	end
+
+	save()
 end
 
 ---@class HeadersConfig?
