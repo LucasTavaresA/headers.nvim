@@ -51,5 +51,6 @@ The setup function receives a table with the options, these are the default valu
 ```lua
 {
 	paths_file = vim.fn.stdpath("data") .. "/headers.nvim/paths.lua",
+	non_code = { "sh", "zsh", "bash", "fish", "vim", "markdown", "txt", "json", "yaml", "toml", "ini", "html", "css", "sql", "xml", "cmake", "make", "diff", "patch", "git", "gitcommit", "gitconfig", "gitignore", "gitattributes", },
 }
 ```

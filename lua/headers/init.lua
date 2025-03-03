@@ -3,6 +3,32 @@
 local M = {}
 M.default_config = {
 	paths_file = vim.fn.stdpath("data") .. "/headers.nvim/paths.lua",
+	non_code = {
+		"sh",
+		"zsh",
+		"bash",
+		"fish",
+		"vim",
+		"markdown",
+		"txt",
+		"json",
+		"yaml",
+		"toml",
+		"ini",
+		"html",
+		"css",
+		"sql",
+		"xml",
+		"cmake",
+		"make",
+		"diff",
+		"patch",
+		"git",
+		"gitcommit",
+		"gitconfig",
+		"gitignore",
+		"gitattributes",
+	},
 }
 local config_file_footer = [[
 
@@ -28,35 +54,6 @@ local config_file_footer = [[
 M.roots = {}
 M.files = {}
 M.folders = {}
-local non_code = {
-	"sh",
-	"zsh",
-	"bash",
-	"fish",
-	"vim",
-	"markdown",
-	"txt",
-	"json",
-	"yaml",
-	"toml",
-	"ini",
-	"html",
-	"css",
-	"sql",
-	"xml",
-	"cmake",
-	"make",
-	"diff",
-	"patch",
-	"git",
-	"gitcommit",
-	"gitconfig",
-	"gitignore",
-	"gitattributes",
-}
-
-require("headers.table").set_all(non_code, true)
-
 local header = ""
 local footer = ""
 
@@ -118,7 +115,7 @@ local function warn()
 			not (vim.bo.modifiable and vim.bo.modified) or
 			file == M.config.paths_file or
 			shell_out("git check-ignore -q " .. file) ~= nil or
-			non_code[filetype] == true
+			M.config.non_code[filetype] == true
 	then
 		return
 	end
@@ -245,6 +242,7 @@ end
 ---@param opts HeadersConfig?
 function M.setup(opts)
 	M.config = vim.tbl_deep_extend("force", M.default_config, opts or {})
+	require("headers.table").set_all(M.config.non_code, true)
 
 	local group = vim.api.nvim_create_augroup("headers.nvim", {})
 
