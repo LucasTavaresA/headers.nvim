@@ -57,6 +57,9 @@ local non_code = {
 
 require("headers.table").set_all(non_code, true)
 
+local header = ""
+local footer = ""
+
 --- Traverses folders from the shallowest to the deepest, executing the callback for each folder
 ---@param folder string
 ---@param callback fun(folder: string)
@@ -148,8 +151,6 @@ local function warn()
 
 	do
 		local namespace = vim.api.nvim_create_namespace("headers.nvim")
-		local header
-		local footer
 
 		if M.files[file] ~= nil then
 			header = M.files[file].header
@@ -212,6 +213,31 @@ local function warn()
 	end
 
 	save()
+end
+
+--- Fixes hovered header/footer
+function M.fix_hovered()
+	local buf = vim.api.nvim_get_current_buf()
+	local namespace = vim.api.nvim_create_namespace("headers.nvim")
+	local warning_level = vim.diagnostic.severity.WARN
+	local diagnostic_count = vim.diagnostic.count(buf, { namespace = namespace })[warning_level]
+
+	if diagnostic_count and diagnostic_count > 0 then
+		local hovering = vim.fn.line(".")
+		local last = vim.fn.line("$")
+
+		if hovering == 1 then
+			if header:gsub('\n', '\n') then
+				vim.api.nvim_buf_set_lines(buf, 0, 0, false, vim.split(header, "\n"))
+			end
+		end
+
+		if hovering == last then
+			if footer:gsub('\n', '\n') then
+				vim.api.nvim_buf_set_lines(buf, -1, -1, false, vim.split(footer, "\n"))
+			end
+		end
+	end
 end
 
 ---@class HeadersConfig?

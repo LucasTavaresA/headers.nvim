@@ -27,8 +27,21 @@ use {
 ```lua
 {
 	"lucastavaresa/headers.nvim",
-	opts = {},
+	config = function ()
+		require("headers").setup()
+	end,
 }
+```
+
+## Keybindings
+
+There is no keybindings by default.
+
+Those are all the available functions:
+
+```lua
+-- Prepends/Appends the hovered header/footer
+vim.keymap.set("n", "<space>H", require("headers").fix_hovered)
 ```
 
 ## Options
