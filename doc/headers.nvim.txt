@@ -6,6 +6,7 @@ Table of Contents                             *headers.nvim-table-of-contents*
 1. headers.nvim                                    |headers.nvim-headers.nvim|
   - Contents                              |headers.nvim-headers.nvim-contents|
   - Installation                      |headers.nvim-headers.nvim-installation|
+  - Keybindings                        |headers.nvim-headers.nvim-keybindings|
   - Options                                |headers.nvim-headers.nvim-options|
 
 ==============================================================================
@@ -41,8 +42,22 @@ lazy.nvim <https://github.com/folke/lazy.nvim>:
 >lua
     {
         "lucastavaresa/headers.nvim",
-        opts = {},
+        config = function ()
+            require("headers").setup()
+        end,
     }
+<
+
+
+KEYBINDINGS                            *headers.nvim-headers.nvim-keybindings*
+
+There is no keybindings by default.
+
+Those are all the available functions:
+
+>lua
+    -- Prepends/Appends the hovered header/footer
+    vim.keymap.set("n", "<space>H", require("headers").fix_hovered)
 <
 
 
@@ -54,6 +69,7 @@ values:
 >lua
     {
         paths_file = vim.fn.stdpath("data") .. "/headers.nvim/paths.lua",
+        non_code = { "sh", "zsh", "bash", "fish", "vim", "markdown", "txt", "json", "yaml", "toml", "ini", "html", "css", "sql", "xml", "cmake", "make", "diff", "patch", "git", "gitcommit", "gitconfig", "gitignore", "gitattributes", },
     }
 <
 
