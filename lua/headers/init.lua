@@ -224,13 +224,13 @@ function M.fix_hovered()
 		local last = vim.fn.line("$")
 
 		if hovering == 1 then
-			if header:gsub('\n', '\n') then
+			if header ~= nil and header ~= "" then
 				vim.api.nvim_buf_set_lines(buf, 0, 0, false, vim.split(header, "\n"))
 			end
 		end
 
 		if hovering == last then
-			if footer:gsub('\n', '\n') then
+			if footer ~= nil and footer ~= "" then
 				vim.api.nvim_buf_set_lines(buf, -1, -1, false, vim.split(footer, "\n"))
 			end
 		end
