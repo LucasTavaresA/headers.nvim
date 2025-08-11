@@ -1,4 +1,3 @@
--- TODO(LucasTA): code action to ignore header and footer
 local M = {}
 M.default_config = {
 	paths_file = vim.fn.stdpath("data") .. "/headers.nvim/paths.lua",
@@ -246,6 +245,18 @@ function M.fix_hovered()
 			end
 		end
 	end
+end
+
+--- Set the current buffer root to ignore warnings
+function M.ignore()
+	local root = get_root()
+
+	if root == nil then
+		return
+	end
+
+	M.roots[root] = {}
+	save()
 end
 
 ---@class HeadersConfig?

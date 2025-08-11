@@ -42,6 +42,8 @@ Those are all the available functions:
 ```lua
 -- Prepends/Appends the hovered header/footer
 vim.keymap.set("n", "<space>H", require("headers").fix_hovered)
+-- Ignore warnings for the current buffer root
+vim.keymap.set("n", "<space>I", require("headers").ignore)
 ```
 
 ## Options
