@@ -1,4 +1,3 @@
--- TODO(LucasTA): code action to write the header and footer
 -- TODO(LucasTA): code action to ignore header and footer
 local M = {}
 M.default_config = {
@@ -105,10 +104,36 @@ local function shell_out(cmd)
 	return nil
 end
 
+--- Get the root of the current buffer, nil if warnings are ignored
+---@return string? root
+local function get_root()
+	local buf = vim.api.nvim_get_current_buf()
+	local file = vim.api.nvim_buf_get_name(buf)
+
+	pcall(dofile, M.config.paths_file)
+
+	local root = vim.lsp.buf.list_workspace_folders()[1]
+
+	if root == nil then
+		root = shell_out("git rev-parse --show-toplevel")
+	end
+
+	local folder = vim.fs.dirname(file)
+
+	iterate_folders(folder, function(p)
+		p = p:gsub("/+$", "") .. "/"
+
+		if M.folders[p] ~= nil then
+			root = p
+		end
+	end)
+
+	return root
+end
+
 local function warn()
 	local buf = vim.api.nvim_get_current_buf()
 	local file = vim.api.nvim_buf_get_name(buf)
-	local folder = vim.fs.dirname(file)
 	local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
 
 	if
@@ -120,21 +145,7 @@ local function warn()
 		return
 	end
 
-	pcall(dofile, M.config.paths_file)
-
-	local root = vim.lsp.buf.list_workspace_folders()[1]
-
-	if root == nil then
-		root = shell_out("git rev-parse --show-toplevel")
-	end
-
-	iterate_folders(folder, function(p)
-		p = p:gsub("/+$", "") .. "/"
-
-		if M.folders[p] ~= nil then
-			root = p
-		end
-	end)
+	local root = get_root()
 
 	if root == nil then
 		return
