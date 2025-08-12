@@ -1,5 +1,6 @@
 local M = {}
 M.default_config = {
+	code_paths = {},
 	paths_file = vim.fn.stdpath("data") .. "/headers.nvim/paths.lua",
 	non_code = {
 		"sh",
@@ -133,7 +134,16 @@ end
 local function warn()
 	local buf = vim.api.nvim_get_current_buf()
 	local file = vim.api.nvim_buf_get_name(buf)
+	local folder = vim.fs.dirname(file)
 	local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
+
+	if not vim.tbl_isempty(M.config.code_paths) and
+			not vim.tbl_contains(M.config.code_paths, function(p)
+				p = p:gsub("/+$", "") .. "/"
+				return folder:sub(1, #p) == p
+			end, { predicate = true }) then
+		return
+	end
 
 	if
 			not (vim.bo.modifiable and vim.bo.modified) or
@@ -260,6 +270,7 @@ function M.ignore()
 end
 
 ---@class HeadersConfig?
+---@field code_paths string[]
 ---@field paths_file string
 ---@param opts HeadersConfig?
 function M.setup(opts)

@@ -52,6 +52,7 @@ The setup function receives a table with the options, these are the default valu
 
 ```lua
 {
+	code_paths = {}, -- {} will warn everywhere, set one or more folders to warn only in those folders
 	paths_file = vim.fn.stdpath("data") .. "/headers.nvim/paths.lua",
 	non_code = { "sh", "zsh", "bash", "fish", "vim", "markdown", "txt", "json", "yaml", "toml", "ini", "html", "css", "sql", "xml", "cmake", "make", "diff", "patch", "git", "gitcommit", "gitconfig", "gitignore", "gitattributes", },
 }
