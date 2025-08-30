@@ -128,6 +128,10 @@ local function get_root()
 		end
 	end)
 
+	if root ~= nil then
+		root = vim.trim(root)
+	end
+
 	return root
 end
 
