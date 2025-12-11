@@ -4,6 +4,12 @@ Zero-config header/footer warnings.
 
 Turn on notifications in [Breaking Changes](https://github.com/LucasTavaresA/headers.nvim/issues/1) if using this plugin.
 
+Example no warings set:
+![example_not_set](https://github.com/user-attachments/assets/f0b0fc38-28e1-4b69-a586-98404523c66e)
+
+Example with warnings set:
+![example_warning](https://github.com/user-attachments/assets/f48402f0-bfef-4166-872c-86f4772a8ccc)
+
 ## Contents
 
 - [Installation](#installation)
