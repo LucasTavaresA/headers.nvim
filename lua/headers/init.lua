@@ -290,19 +290,16 @@ local function warn()
 		end
 
 		local line_count = vim.api.nvim_buf_line_count(buf)
+		local footer_start = math.max(line_count - (1 + select(2, footer:gsub("\n", "\n"))), 0)
+		local footer_lnum = math.max(line_count - 1, 0)
 
 		if
-			footer ~= ""
-			and footer
-				~= table.concat(
-					vim.api.nvim_buf_get_lines(buf, line_count - (1 + select(2, footer:gsub("\n", "\n"))), line_count, false),
-					"\n"
-				)
+			footer ~= "" and footer ~= table.concat(vim.api.nvim_buf_get_lines(buf, footer_start, line_count, false), "\n")
 		then
 			table.insert(diagnostics, {
 				namespace = namespace,
 				bufnr = buf,
-				lnum = line_count - (1 - select(2, footer:gsub("\n", "\n"))),
+				lnum = footer_lnum,
 				col = 0,
 				end_col = 999,
 				severity = vim.diagnostic.severity.WARN,
