@@ -110,21 +110,77 @@ local function shell_out(cmd)
 	return nil
 end
 
+--- Returns the most specific LSP root attached to the buffer that contains the file, nil if there's none.
+---@param buf integer
+---@param file string
+---@return string? root
+local function try_get_lsp_root(buf, file)
+	if file == "" then
+		return nil
+	end
+
+	local normalized_file = vim.fs.normalize(file):gsub("/+$", "")
+	local roots = {}
+
+	local function add_root(root)
+		if root == nil or root == "" then
+			return
+		end
+
+		root = vim.fs.normalize(root):gsub("/+$", "")
+
+		if root == "" then
+			root = "/"
+		end
+
+		if root == "/" or normalized_file == root or normalized_file:sub(1, #root + 1) == root .. "/" then
+			table.insert(roots, root)
+		end
+	end
+
+	for _, client in ipairs(vim.lsp.get_clients({ bufnr = buf })) do
+		local config = client.config or {}
+
+		for _, workspace in ipairs(client.workspace_folders or {}) do
+			if workspace.uri ~= nil then
+				add_root(vim.uri_to_fname(workspace.uri))
+			else
+				add_root(workspace.name)
+			end
+		end
+
+		for _, workspace in ipairs(config.workspace_folders or {}) do
+			if workspace.uri ~= nil then
+				add_root(vim.uri_to_fname(workspace.uri))
+			else
+				add_root(workspace.name)
+			end
+		end
+
+		add_root(client.root_dir or config.root_dir)
+	end
+
+	table.sort(roots, function(a, b)
+		return #a > #b
+	end)
+
+	return roots[1]
+end
+
 --- Get the root of the current buffer, nil if warnings are ignored
 ---@return string? root
 local function get_root()
 	local buf = vim.api.nvim_get_current_buf()
 	local file = vim.api.nvim_buf_get_name(buf)
+	local folder = vim.fs.dirname(file)
 
 	pcall(dofile, M.config.paths_file)
 
-	local root = vim.lsp.buf.list_workspace_folders()[1]
+	local root = try_get_lsp_root(buf, file)
 
-	if root == nil then
-		root = shell_out({ "git", "rev-parse", "--show-toplevel" })
+	if root == nil and folder ~= nil and folder ~= "" then
+		root = shell_out({ "git", "-C", folder, "rev-parse", "--show-toplevel" })
 	end
-
-	local folder = vim.fs.dirname(file)
 
 	iterate_folders(folder, function(p)
 		p = p:gsub("/+$", "") .. "/"
@@ -160,7 +216,7 @@ local function warn()
 	if
 		not (vim.bo.modifiable and vim.bo.modified)
 		or file == M.config.paths_file
-		or shell_out({ "git", "check-ignore", "-q", "--", file }) ~= nil
+		or (folder ~= nil and folder ~= "" and shell_out({ "git", "-C", folder, "check-ignore", "-q", "--", file }) ~= nil)
 		or M.config.non_code[filetype] == true
 	then
 		return
@@ -192,8 +248,8 @@ local function warn()
 		end
 
 		if entry.header == nil and entry.footer == nil then
-			header = nil
-			footer = nil
+			header = ""
+			footer = ""
 			vim.diagnostic.reset(namespace, buf)
 			return
 		end
@@ -273,13 +329,13 @@ function M.fix_hovered()
 		local last = vim.fn.line("$")
 
 		if hovering == 1 then
-			if header ~= nil and header ~= "" then
+			if header ~= "" then
 				vim.api.nvim_buf_set_lines(buf, 0, 0, false, vim.split(header, "\n"))
 			end
 		end
 
 		if hovering == last then
-			if footer ~= nil and footer ~= "" then
+			if footer ~= "" then
 				vim.api.nvim_buf_set_lines(buf, -1, -1, false, vim.split(footer, "\n"))
 			end
 		end
