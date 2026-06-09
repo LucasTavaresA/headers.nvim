@@ -77,13 +77,19 @@ local function save()
 
 	if file then
 		file:write(
-			headers .. ".files = " .. vim.inspect(M.files)
-			.. '\n'
-			.. headers .. ".folders = " .. vim.inspect(M.folders)
-			.. '\n'
-			.. headers .. ".roots = " .. vim.inspect(M.roots)
-			.. '\n'
-			.. config_file_footer
+			headers
+				.. ".files = "
+				.. vim.inspect(M.files)
+				.. "\n"
+				.. headers
+				.. ".folders = "
+				.. vim.inspect(M.folders)
+				.. "\n"
+				.. headers
+				.. ".roots = "
+				.. vim.inspect(M.roots)
+				.. "\n"
+				.. config_file_footer
 		)
 		file:close()
 	else
@@ -141,19 +147,21 @@ local function warn()
 	local folder = vim.fs.dirname(file)
 	local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
 
-	if not vim.tbl_isempty(M.config.code_paths) and
-			not vim.tbl_contains(M.config.code_paths, function(p)
-				p = p:gsub("/+$", "") .. "/"
-				return folder:sub(1, #p) == p
-			end, { predicate = true }) then
+	if
+		not vim.tbl_isempty(M.config.code_paths)
+		and not vim.tbl_contains(M.config.code_paths, function(p)
+			p = p:gsub("/+$", "") .. "/"
+			return folder:sub(1, #p) == p
+		end, { predicate = true })
+	then
 		return
 	end
 
 	if
-			not (vim.bo.modifiable and vim.bo.modified) or
-			file == M.config.paths_file or
-			shell_out("git check-ignore -q " .. file) ~= nil or
-			M.config.non_code[filetype] == true
+		not (vim.bo.modifiable and vim.bo.modified)
+		or file == M.config.paths_file
+		or shell_out("git check-ignore -q " .. file) ~= nil
+		or M.config.non_code[filetype] == true
 	then
 		return
 	end
@@ -194,7 +202,7 @@ local function warn()
 					end_col = 999,
 					severity = vim.diagnostic.severity.WARN,
 					message = "No header or footer set for this project at " .. root .. " Set it with :HeadersConfig",
-				}
+				},
 			})
 			return
 		elseif header == nil and footer == nil then
@@ -204,7 +212,11 @@ local function warn()
 
 		local diagnostics = {}
 
-		if header ~= "" and header ~= table.concat(vim.api.nvim_buf_get_lines(buf, 0, (1 + select(2, header:gsub('\n', '\n'))), false), '\n') then
+		if
+			header ~= ""
+			and header
+				~= table.concat(vim.api.nvim_buf_get_lines(buf, 0, (1 + select(2, header:gsub("\n", "\n"))), false), "\n")
+		then
 			table.insert(diagnostics, {
 				namespace = namespace,
 				bufnr = buf,
@@ -218,11 +230,18 @@ local function warn()
 
 		local line_count = vim.api.nvim_buf_line_count(buf)
 
-		if footer ~= "" and footer ~= table.concat(vim.api.nvim_buf_get_lines(buf, line_count - (1 + select(2, footer:gsub('\n', '\n'))), line_count, false), '\n') then
+		if
+			footer ~= ""
+			and footer
+				~= table.concat(
+					vim.api.nvim_buf_get_lines(buf, line_count - (1 + select(2, footer:gsub("\n", "\n"))), line_count, false),
+					"\n"
+				)
+		then
 			table.insert(diagnostics, {
 				namespace = namespace,
 				bufnr = buf,
-				lnum = line_count - (1 - select(2, footer:gsub('\n', '\n'))),
+				lnum = line_count - (1 - select(2, footer:gsub("\n", "\n"))),
 				col = 0,
 				end_col = 999,
 				severity = vim.diagnostic.severity.WARN,
@@ -283,18 +302,18 @@ function M.setup(opts)
 
 	local group = vim.api.nvim_create_augroup("headers.nvim", {})
 
-	vim.api.nvim_create_autocmd('InsertEnter', { group = group, callback = warn })
-	vim.api.nvim_create_autocmd('InsertLeave', { group = group, callback = warn })
-	vim.api.nvim_create_autocmd('TextChangedI', { group = group, callback = warn })
-	vim.api.nvim_create_autocmd('TextChanged', { group = group, callback = warn })
+	vim.api.nvim_create_autocmd("InsertEnter", { group = group, callback = warn })
+	vim.api.nvim_create_autocmd("InsertLeave", { group = group, callback = warn })
+	vim.api.nvim_create_autocmd("TextChangedI", { group = group, callback = warn })
+	vim.api.nvim_create_autocmd("TextChanged", { group = group, callback = warn })
 
 	-- In case you move between buffers in insert mode
-	vim.api.nvim_create_autocmd('BufEnter', { group = group, callback = warn })
-	vim.api.nvim_create_autocmd('BufLeave', { group = group, callback = warn })
+	vim.api.nvim_create_autocmd("BufEnter", { group = group, callback = warn })
+	vim.api.nvim_create_autocmd("BufLeave", { group = group, callback = warn })
 
 	vim.api.nvim_create_user_command("HeadersConfig", function()
 		vim.cmd.e(M.config.paths_file)
-	end, { desc = 'Open paths file' })
+	end, { desc = "Open paths file" })
 end
 
 return M
