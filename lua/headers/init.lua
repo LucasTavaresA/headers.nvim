@@ -71,7 +71,7 @@ local function iterate_folders(folder, callback)
 end
 
 local function save()
-	os.execute("mkdir -p " .. vim.fs.dirname(M.config.paths_file))
+	vim.fn.mkdir(vim.fs.dirname(M.config.paths_file), "p")
 	local file, err = io.open(M.config.paths_file, "w")
 	local headers = [[require("headers")]]
 
@@ -97,8 +97,8 @@ local function save()
 	end
 end
 
---- Executes a shell command and returns the output, nil if non-zero exit code
----@param cmd string
+--- Executes a command and returns the output, nil if non-zero exit code
+---@param cmd string[]
 ---@return string? out
 local function shell_out(cmd)
 	local out = vim.fn.system(cmd)
@@ -121,7 +121,7 @@ local function get_root()
 	local root = vim.lsp.buf.list_workspace_folders()[1]
 
 	if root == nil then
-		root = shell_out("git rev-parse --show-toplevel")
+		root = shell_out({ "git", "rev-parse", "--show-toplevel" })
 	end
 
 	local folder = vim.fs.dirname(file)
@@ -160,7 +160,7 @@ local function warn()
 	if
 		not (vim.bo.modifiable and vim.bo.modified)
 		or file == M.config.paths_file
-		or shell_out("git check-ignore -q " .. file) ~= nil
+		or shell_out({ "git", "check-ignore", "-q", "--", file }) ~= nil
 		or M.config.non_code[filetype] == true
 	then
 		return
