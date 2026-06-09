@@ -181,16 +181,25 @@ local function warn()
 	do
 		local namespace = vim.api.nvim_create_namespace("headers.nvim")
 
+		local entry
+
 		if M.files[file] ~= nil then
-			header = M.files[file].header
-			footer = M.files[file].footer
+			entry = M.files[file]
 		elseif M.folders[root] ~= nil then
-			header = M.folders[root].header
-			footer = M.folders[root].footer
+			entry = M.folders[root]
 		else
-			header = M.roots[root].header
-			footer = M.roots[root].footer
+			entry = M.roots[root]
 		end
+
+		if entry.header == nil and entry.footer == nil then
+			header = nil
+			footer = nil
+			vim.diagnostic.reset(namespace, buf)
+			return
+		end
+
+		header = entry.header or ""
+		footer = entry.footer or ""
 
 		if header == "" and footer == "" then
 			vim.diagnostic.set(namespace, buf, {
@@ -204,9 +213,6 @@ local function warn()
 					message = "No header or footer set for this project at " .. root .. " Set it with :HeadersConfig",
 				},
 			})
-			return
-		elseif header == nil and footer == nil then
-			vim.diagnostic.reset(namespace, buf)
 			return
 		end
 
