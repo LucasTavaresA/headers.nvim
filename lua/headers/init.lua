@@ -281,6 +281,7 @@ local function warn()
 			table.insert(diagnostics, {
 				namespace = namespace,
 				bufnr = buf,
+				code = "missing-header",
 				lnum = 0,
 				col = 0,
 				end_col = 999,
@@ -299,6 +300,7 @@ local function warn()
 			table.insert(diagnostics, {
 				namespace = namespace,
 				bufnr = buf,
+				code = "missing-footer",
 				lnum = footer_lnum,
 				col = 0,
 				end_col = 999,
@@ -318,22 +320,16 @@ function M.fix_hovered()
 	local buf = vim.api.nvim_get_current_buf()
 	local namespace = vim.api.nvim_create_namespace("headers.nvim")
 	local warning_level = vim.diagnostic.severity.WARN
-	local diagnostic_count = vim.diagnostic.count(buf, { namespace = namespace })[warning_level]
+	local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+	local diagnostics = vim.diagnostic.get(buf, { namespace = namespace, lnum = lnum })
 
-	if diagnostic_count and diagnostic_count > 0 then
-		local hovering = vim.fn.line(".")
-		local last = vim.fn.line("$")
-
-		if hovering == 1 then
-			if header ~= "" then
-				vim.api.nvim_buf_set_lines(buf, 0, 0, false, vim.split(header, "\n"))
-			end
-		end
-
-		if hovering == last then
-			if footer ~= "" then
-				vim.api.nvim_buf_set_lines(buf, -1, -1, false, vim.split(footer, "\n"))
-			end
+	for _, diagnostic in ipairs(diagnostics) do
+		if diagnostic.severity == warning_level and diagnostic.code == "missing-header" and header ~= "" then
+			vim.api.nvim_buf_set_lines(buf, 0, 0, false, vim.split(header, "\n"))
+			return
+		elseif diagnostic.severity == warning_level and diagnostic.code == "missing-footer" and footer ~= "" then
+			vim.api.nvim_buf_set_lines(buf, -1, -1, false, vim.split(footer, "\n"))
+			return
 		end
 	end
 end
