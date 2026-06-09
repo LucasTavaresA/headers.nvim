@@ -37,16 +37,15 @@ local config_file_footer = [[
 -- Only one will be shown, the priority is: 1.file 2.folder 3.root
 --
 -- to ignore warning set to {} like this:
--- require("headers").roots = {
---   ["/example/project/"] = {
---   }
+-- require("headers").example = {
+--   ["/example/project/"] = {}
 -- }
 --
 -- usage example:
 -- require("headers").example = {
 --   ["/example/project/"] = {
 --     header = "",
---     footer = "// Licensed under the GPL3 or later versions of the GPL license.\n// See the LICENSE file in the project root for more information.\n",
+--     footer = "// Licensed under the GPL3 or later versions of the GPL license.\n// See the LICENSE file in the project root for more information.",
 --   }
 -- }
 ]]
