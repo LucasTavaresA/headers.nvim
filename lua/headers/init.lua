@@ -96,14 +96,17 @@ local function save()
 	end
 end
 
---- Executes a command and returns the output, nil if non-zero exit code
+--- Executes a command and returns the output
 ---@param cmd string[]
----@return string? out
-local function shell_out(cmd)
-	local out = vim.fn.system(cmd)
+---@param opts? vim.SystemOpts options passed to vim.system
+---@return string? out command output, nil on error or non-zero exit code
+local function system_out(cmd, opts)
+	local ok, out = pcall(function()
+		return vim.system(cmd, vim.tbl_extend("force", { text = true }, opts or {})):wait()
+	end)
 
-	if vim.v.shell_error == 0 then
-		return out
+	if ok and out.code == 0 then
+		return out.stdout or ""
 	end
 
 	return nil
@@ -178,7 +181,7 @@ local function get_root()
 	local root = try_get_lsp_root(buf, file)
 
 	if root == nil and folder ~= nil and folder ~= "" then
-		root = shell_out({ "git", "-C", folder, "rev-parse", "--show-toplevel" })
+		root = system_out({ "git", "rev-parse", "--show-toplevel" }, { cwd = folder })
 	end
 
 	iterate_folders(folder, function(p)
@@ -228,7 +231,7 @@ local function warn()
 	if
 		not (vim.bo.modifiable and vim.bo.modified)
 		or file == M.config.paths_file
-		or (folder ~= nil and folder ~= "" and shell_out({ "git", "-C", folder, "check-ignore", "-q", "--", file }) ~= nil)
+		or (folder ~= nil and folder ~= "" and system_out({ "git", "check-ignore", "-q", "--", file }, { cwd = folder }) ~= nil)
 		or M.config.non_code[filetype] == true
 	then
 		return
