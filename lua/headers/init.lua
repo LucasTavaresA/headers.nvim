@@ -199,14 +199,27 @@ end
 local function warn()
 	local buf = vim.api.nvim_get_current_buf()
 	local file = vim.api.nvim_buf_get_name(buf)
-	local folder = vim.fs.dirname(file)
+
+	if file == "" then
+		return
+	end
+
+	local folder = vim.fs.dirname(file):gsub("/+$", "")
+	if folder == "" then
+		folder = "/"
+	end
+
 	local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
 
 	if
 		not vim.tbl_isempty(M.config.code_paths)
 		and not vim.tbl_contains(M.config.code_paths, function(p)
-			p = p:gsub("/+$", "") .. "/"
-			return folder:sub(1, #p) == p
+			p = vim.fs.normalize(p):gsub("/+$", "")
+			if p == "" then
+				p = "/"
+			end
+
+			return p == "/" or folder == p or folder:sub(1, #p + 1) == p .. "/"
 		end, { predicate = true })
 	then
 		return
