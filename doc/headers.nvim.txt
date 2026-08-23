@@ -1,5 +1,5 @@
 *headers.nvim.txt*                         Zero-config header/footer warnings.
-                                  For NVIM v0.8.0    Last change: 2026 June 11
+                                For NVIM v0.8.0    Last change: 2026 August 23
 
 ==============================================================================
 Table of Contents                             *headers.nvim-table-of-contents*
