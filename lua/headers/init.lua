@@ -2,7 +2,7 @@ local M = {}
 M.default_config = {
 	code_paths = {},
 	paths_file = vim.fn.stdpath("data") .. "/headers.nvim/paths.lua",
-	non_code = {
+	ignore_filetypes = {
 		"sh",
 		"zsh",
 		"bash",
@@ -235,7 +235,7 @@ local function warn()
 		or file == M.config.paths_file
 		or ("/" .. vim.fs.normalize(file)):find("/%.git/") ~= nil
 		or (folder ~= nil and folder ~= "" and system_out({ "git", "check-ignore", "-q", "--", file }, { cwd = folder }) ~= nil)
-		or M.config.non_code[filetype] == true
+		or M.config.ignore_filetypes[filetype] == true
 	then
 		return
 	end
@@ -371,7 +371,7 @@ end
 ---@param opts HeadersConfig?
 function M.setup(opts)
 	M.config = vim.tbl_deep_extend("force", M.default_config, opts or {})
-	require("headers.table").set_all(M.config.non_code, true)
+	require("headers.table").set_all(M.config.ignore_filetypes, true)
 
 	local group = vim.api.nvim_create_augroup("headers.nvim", {})
 
